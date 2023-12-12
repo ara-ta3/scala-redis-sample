@@ -1,6 +1,6 @@
 package sample
 
-import sample.infrastructure.JedisRepository
+import sample.infrastructure.{JedisRepository, LettuceRepository}
 
 object Main {
   private val redisHost: String = "127.0.0.1"
@@ -19,6 +19,19 @@ object Main {
           _ = println(v)
         } yield ()
       })
-  }
 
+    LettuceRepository
+      .pool(redisHost, redisPort)
+      .using(p => {
+        val c = p.connection.sync()
+        val r = new LettuceRepository(c)
+        for {
+          v <- r.fetch("b")
+          _ = println(v)
+          _ <- r.put("b", "yyy")
+          v <- r.fetch("b")
+          _ = println(v)
+        } yield ()
+      })
+  }
 }

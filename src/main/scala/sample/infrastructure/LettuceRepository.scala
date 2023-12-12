@@ -1,6 +1,7 @@
 package sample.infrastructure
 
-import io.lettuce.core.RedisClient
+import io.lettuce.core.api.StatefulRedisConnection
+import io.lettuce.core.{RedisClient, RedisURI}
 import io.lettuce.core.api.sync.RedisStringCommands
 import sample.util.Loan
 
@@ -19,12 +20,18 @@ class LettuceRepository(sync: RedisStringCommands[String, String]) {
 }
 
 object LettuceRepository {
-  def pool(host: String, port: Int): Loan[LettuceClientWrapper] =
-    Loan(
-      LettuceClientWrapper(RedisClient.create(s"redis://$host:$port").connect())
-    )
-}
+  def pool(host: String, port: Int): Loan[LettuceConnection] = {
+    val cli = RedisClient.create(RedisURI.create(host, port))
+    Loan(LettuceConnection(cli, cli.connect()))
+  }
 
-case class LettuceClientWrapper(client: RedisClient) {
-  def close(): Unit = client.shutdown()
+  case class LettuceConnection(
+    client: RedisClient,
+    connection: StatefulRedisConnection[String, String]
+  ) {
+    def close(): Unit = {
+      connection.close()
+      client.close()
+    }
+  }
 }

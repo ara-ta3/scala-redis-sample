@@ -1,7 +1,6 @@
 package sample.infrastructure
 
 import redis.clients.jedis.JedisPool
-import sample.Main
 import sample.util.Loan
 
 import scala.util.control.Exception.allCatch
