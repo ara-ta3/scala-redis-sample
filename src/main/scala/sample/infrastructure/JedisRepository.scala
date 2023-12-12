@@ -21,6 +21,6 @@ class JedisRepository(pool: JedisPool) {
 }
 
 object JedisRepository {
-  def pool: Loan[JedisPool] =
-    Loan(new JedisPool(Main.redisHost, Main.redisPort))
+  def pool(host: String, port: Int): Loan[JedisPool] =
+    Loan(new JedisPool(host, port))
 }
